@@ -6,7 +6,7 @@ import numpy as np
 # Load dataset
 @st.cache_data
 def load_data():
-    data = pd.read_csv(r"C:\Users\user\Videos\belajar\Dicoding\Dicoding\visualisasi\dataset\hour.csv")
+    data = pd.read_csv(r"hour.csv")
     return data
 
 data = load_data()
