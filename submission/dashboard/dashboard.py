@@ -44,10 +44,6 @@ ax.set_title("Variasi Kecepatan Angin")
 st.pyplot(fig)
 
 
-# Sidebar
-st.sidebar.title("Dashboard Filter")
-date_filter = st.sidebar.date_input("Pilih Tanggal", pd.to_datetime("2011-01-01"))
-
 # Main Dashboard
 st.title("Dashboard Analisis Data")
 st.write("### Ringkasan Data")

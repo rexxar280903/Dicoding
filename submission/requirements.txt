@@ -1,0 +1,12 @@
+ipython==8.12.3
+jupyter_client==8.6.3
+jupyter_core==5.7.2
+jupyterlab_pygments==0.3.0
+matplotlib-inline==0.1.7
+numpy==2.2.2
+packaging==24.2
+pandas==2.2.3
+pillow==11.1.0
+scipy==1.15.1
+seaborn==0.13.2
+streamlit==1.43.0
