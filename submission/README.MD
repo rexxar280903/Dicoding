@@ -1,5 +1,5 @@
 Setup environment
-python -m venv 
+python -m venv env
 venv\scripts\activate
 pip install -r requirements.txt
 
