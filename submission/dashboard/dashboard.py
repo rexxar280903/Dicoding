@@ -7,122 +7,89 @@ import numpy as np
 @st.cache_data
 def load_data():
     data = pd.read_csv(r"hour.csv")
+    data['dteday'] = pd.to_datetime(data['dteday'])  # Konversi ke datetime
     return data
 
 data = load_data()
 
+# Mapping musim
+season_mapping = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
+
+# Sidebar untuk memilih musim
+selected_season = st.sidebar.selectbox("Pilih Musim", ["Semua"] + list(season_mapping.values()))
+
+# Filter data berdasarkan musim yang dipilih
+if selected_season != "Semua":
+    season_key = [k for k, v in season_mapping.items() if v == selected_season][0]
+    filtered_data = data[data['season'] == season_key]
+else:
+    filtered_data = data  # Jika "Semua", tampilkan semua data
+
+# Tampilkan hasil setelah filter
+st.write("### Data setelah difilter berdasarkan musim:")
+st.write(filtered_data)
+
+# Contoh visualisasi setelah filter
+st.write("### Histogram Pengguna Terdaftar Berdasarkan Musim")
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+ax.hist(filtered_data['registered'], bins=20, color='green', edgecolor='black')
+ax.set_xlabel("Jumlah Pengguna Terdaftar")
+ax.set_ylabel("Frekuensi")
+ax.set_title("Distribusi Pengguna Terdaftar Berdasarkan Musim")
+st.pyplot(fig)
 # Main Dashboard
 st.title("Dashboard Analisis Data")
 st.write("### Ringkasan Data")
 st.write(data.describe())
 
 # Visualisasi Data
-st.write("### Boxplot Kecepatan Angin")
-fig1, ax1 = plt.subplots()
-ax1.boxplot(data['windspeed'], whis=3)
-st.pyplot(fig1)
+def plot_histogram(column, title, xlabel, color):
+    fig, ax = plt.subplots()
+    ax.hist(data[column], bins=20, color=color, edgecolor='black')
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel("Frekuensi")
+    ax.set_title(title)
+    st.pyplot(fig)
 
+# Histogram Kecepatan Angin
+st.write("### Histogram Kecepatan Angin")
+plot_histogram('windspeed', "Distribusi Kecepatan Angin", "Kecepatan Angin", 'skyblue')
 
-st.title("Visualisasi Histogram Kecepatan Angin")
-
-# Membuat histogram
-fig, ax = plt.subplots()
-ax.hist(data['windspeed'], bins=20, color='skyblue', edgecolor='black')
-ax.set_xlabel("Kecepatan Angin")
-ax.set_ylabel("Frekuensi")
-ax.set_title("Distribusi Kecepatan Angin")
-st.pyplot(fig)
-
-
-st.title("Scatter Plot Kecepatan Angin")
-# Membuat scatter plot
-fig, ax = plt.subplots()
-ax.scatter(range(len(data['windspeed'])), data['windspeed'], color='red', alpha=0.5)
-ax.set_xlabel("Indeks Data")
-ax.set_ylabel("Kecepatan Angin")
-ax.set_title("Variasi Kecepatan Angin")
-st.pyplot(fig)
-
-
-# Main Dashboard
-st.title("Dashboard Analisis Data")
-st.write("### Ringkasan Data")
-st.write(data.describe())
-
-# Visualisasi Boxplot
-st.write("### Boxplot Pengguna Terdaftar")
-fig1, ax1 = plt.subplots()
-ax1.boxplot(data['registered'])
-st.pyplot(fig1)
-
-# Visualisasi Histogram
-st.write("### Histogram Pengguna Terdaftar")
-fig2, ax2 = plt.subplots()
-ax2.hist(data['registered'], bins=20, color='green', edgecolor='black')
-st.pyplot(fig2)
-
-# Visualisasi Scatter Plot
+# Scatter Plot Pengguna Terdaftar
 st.write("### Scatter Plot Pengguna Terdaftar")
-fig3, ax3 = plt.subplots()
-ax3.scatter(range(len(data['registered'])), data['registered'], color='blue', alpha=0.5)
-st.pyplot(fig3)
+fig, ax = plt.subplots()
+ax.scatter(range(len(data['registered'])), data['registered'], color='blue', alpha=0.5)
+ax.set_xlabel("Indeks Data")
+ax.set_ylabel("Jumlah Pengguna Terdaftar")
+ax.set_title("Variasi Pengguna Terdaftar")
+st.pyplot(fig)
 
-# Visualisasi Line Chart
+# Line Chart Jumlah 'cnt' berdasarkan 'instant'
 st.write("### Line Chart Jumlah 'cnt' berdasarkan 'instant'")
-fig4, ax4 = plt.subplots(figsize=(18, 8))
-ax4.plot(data['instant'], data['cnt'], color='b')
-ax4.set_title("Line Chart Jumlah 'cnt' berdasarkan 'instant'")
-ax4.set_xlabel("Instant")
-ax4.set_ylabel("Count (cnt)")
-st.pyplot(fig4)
+fig, ax = plt.subplots(figsize=(12, 6))
+ax.plot(data['instant'], data['cnt'], color='b')
+ax.set_title("Line Chart Jumlah 'cnt' berdasarkan 'instant'")
+ax.set_xlabel("Instant")
+ax.set_ylabel("Count (cnt)")
+st.pyplot(fig)
 
-# Visualisasi Bar Chart Berdasarkan Musim dan Tahun
+# Bar Chart Berdasarkan Musim dan Tahun
 st.write("### Jumlah Rental Sepeda Berdasarkan Musim dan Tahun")
 season_rentals = data.groupby(['season', 'yr'])['cnt'].sum().unstack()
 x = np.arange(len(season_rentals.index))
 width = 0.4
-fig5, ax5 = plt.subplots(figsize=(10, 8))
-rects1 = ax5.bar(x - width/2, season_rentals[0], width, label="2011", color='royalblue')
-rects2 = ax5.bar(x + width/2, season_rentals[1], width, label="2012", color='orange')
-ax5.set_xticks(x)
-ax5.set_xticklabels(['Spring', 'Summer', 'Fall', 'Winter'], fontsize=12)
-ax5.set_title('Jumlah Rental Sepeda Berdasarkan Musim dan Tahun')
-ax5.set_xlabel('Musim')
-ax5.set_ylabel('Total Rental Sepeda')
-ax5.legend()
-st.pyplot(fig5)
-
-# Visualisasi Bar Chart Berdasarkan Cuaca dan Tahun
-st.write("### Jumlah Rental Sepeda Berdasarkan Kondisi Cuaca dan Tahun")
-weathershit_rentals = data.groupby(['weathersit','yr'])['cnt'].sum().unstack()
-x = np.arange(len(weathershit_rentals.index))
-fig6, ax6 = plt.subplots(figsize=(10, 8))
-rects1 = ax6.bar(x - width/2, weathershit_rentals[0], width, label="2011", color='royalblue')
-rects2 = ax6.bar(x + width/2, weathershit_rentals[1], width, label="2012", color='orange')
-ax6.set_xticks(x)
-ax6.set_xticklabels(['Clear', 'Mist', 'Light Snow', 'Heavy Rain'], fontsize=12)
-ax6.set_title('Jumlah Rental Sepeda Berdasarkan Kondisi Cuaca dan Tahun')
-ax6.set_xlabel('Kondisi Cuaca')
-ax6.set_ylabel('Total Rental Sepeda')
-ax6.legend()
-st.pyplot(fig6)
-
-# Visualisasi Bar Chart Berdasarkan Hari Kerja, Musim, dan Tahun
-st.write("### Jumlah Rental Sepeda Berdasarkan Musim, Hari Kerja, dan Tahun")
-grouped_data = data.groupby(["workingday", "season", "yr"])['cnt'].sum().unstack()
-x = np.arange(len(grouped_data))
-fig7, ax7 = plt.subplots(figsize=(12, 8))
-rects1 = ax7.bar(x - width/2, grouped_data.loc[:, 0], width, label="2011", color='royalblue')
-rects2 = ax7.bar(x + width/2, grouped_data.loc[:, 1], width, label="2012", color='orange')
-season_labels = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
-labels = [f"Workday {wd} - {season_labels[s]}" for wd, s in grouped_data.index]
-ax7.set_xticks(x)
-ax7.set_xticklabels(labels, rotation=45, ha="right", fontsize=12)
-ax7.set_title('Jumlah Rental Sepeda Berdasarkan Musim, Hari Kerja, dan Tahun')
-ax7.set_xlabel('Kombinasi Hari Kerja dan Musim')
-ax7.set_ylabel('Total Rental Sepeda')
-ax7.legend()
-st.pyplot(fig7)
+fig, ax = plt.subplots(figsize=(10, 6))
+rects1 = ax.bar(x - width/2, season_rentals[0], width, label="2011", color='royalblue')
+rects2 = ax.bar(x + width/2, season_rentals[1], width, label="2012", color='orange')
+ax.set_xticks(x)
+ax.set_xticklabels([season_mapping[i] for i in season_rentals.index])
+ax.set_title('Jumlah Rental Sepeda Berdasarkan Musim dan Tahun')
+ax.set_xlabel('Musim')
+ax.set_ylabel('Total Rental Sepeda')
+ax.legend()
+st.pyplot(fig)
 
 # Menampilkan Data Sample
 st.write("### Data Sample")
